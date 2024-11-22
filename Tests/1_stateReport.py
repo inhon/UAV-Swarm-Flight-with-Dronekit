@@ -4,16 +4,21 @@ Check if the state report feature in 'Drone' class works
 from dronekit import connect, VehicleMode, LocationGlobalRelative
 import time
 import sys
+import os
 import math
 import socket
 
-sys.path.append("..")
+#sys.path.append("..")
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
+
 from Drone import Drone
 from RepeatTimer import RepeatTimer
 from Internet import checkInternetConnection
 
-connection_strings = ["/dev/ttyACM0","/dev/tty.usbmodem14101"]
-# connection_string = "/dev/tty.usbmodem14101"
+connection_strings = ["tcp:127.0.0.1:5762"]
+#connection_string = "/dev/tty.usbmodem14101"
+
 
 ''' Connect to vehicle '''
 for connection_string in connection_strings:
