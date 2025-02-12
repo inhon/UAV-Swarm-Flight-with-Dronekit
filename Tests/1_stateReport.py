@@ -25,3 +25,11 @@ for connection_string in connection_strings:
     vehicle = Drone(connection_string)
     if(vehicle.connected): break
 vehicle.setStateReport(3)
+try:
+    while True:
+        time.sleep(1)
+        #print("main loop")
+except KeyboardInterrupt:
+    vehicle.cancelStateReport()
+    #time.sleep(1)
+    vehicle.vehicle.close()
