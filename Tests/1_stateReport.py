@@ -22,14 +22,14 @@ connection_strings = ["tcp:127.0.0.1:5762"]
 
 ''' Connect to vehicle '''
 for connection_string in connection_strings:
-    vehicle = Drone(connection_string)
-    if(vehicle.connected): break
-vehicle.setStateReport(3)
+    drone = Drone(connection_string)
+    if(drone.connected): break
+drone.setStateReport(3)
 try:
     while True:
         time.sleep(1)
         #print("main loop")
 except KeyboardInterrupt:
-    vehicle.cancelStateReport()
+    drone.cancelStateReport()
     #time.sleep(1)
-    vehicle.vehicle.close()
+    drone.vehicle.close()
