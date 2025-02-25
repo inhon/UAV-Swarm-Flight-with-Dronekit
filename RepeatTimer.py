@@ -14,5 +14,5 @@ class RepeatTimer(Timer):
 
 
 
-def sendMsg(vehicle, client):
-    vehicle.sendInfo(client, "COORDINATES")
+def sendMsg(drone, client):
+    drone.sendInfo(client, "COORDINATES")

@@ -33,3 +33,4 @@ except KeyboardInterrupt:
     drone.cancelStateReport()
     #time.sleep(1)
     drone.vehicle.close()
+    #drone.close()

@@ -37,15 +37,13 @@ f.write("At time "+datetime.now().strftime("%H%M%S")+" Connect Timer set.\n")
 try:
     while True:
         time.sleep(1)
-        #print("main loop")
+        print("main loop")
 except KeyboardInterrupt:
     drone.cancelStateReport()
     checkConnectTimer.cancel()
     #time.sleep(1)
     drone.vehicle.close()
     f.close()
-#checkConnectTimer.join()
-#f.close()
 
 ''' 
 Here you can check if it will try to land the vehicle after disconnecting wifi/Internet

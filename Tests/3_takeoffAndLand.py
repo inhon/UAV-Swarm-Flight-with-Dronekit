@@ -6,27 +6,43 @@ import time
 import sys
 import math
 import socket
+import os
 
-sys.path.append("..")
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
+
 from Drone import Drone
 from RepeatTimer import RepeatTimer
 from Internet import checkInternetConnection
 
-connection_strings = ["/dev/ttyACM0","/dev/tty.usbmodem14101"]
-# connection_string = "/dev/tty.usbmodem14101"
+connection_strings = ["tcp:127.0.0.1:5762"]
+#connection_strings = ["tcp:127.0.0.1:5762","tcp:127.0.0.1:5772"]
+#connection_string = "tcp:127.0.0.1:5762"
+#connection_string = "/dev/tty.usbmodem14101"
 
 ''' Connect to vehicle '''
 for connection_string in connection_strings:
-    vehicle = Drone(connection_string)
-    if(vehicle.connected): break
-vehicle.setStateReport(3)
+    drone = Drone(connection_string)
+    if(drone.connected): break
+drone.setStateReport(5)
 
 ''' Setting up a checker to see if internet connection works, otherwise land the vehicle'''
-checkConnectTimer = RepeatTimer(10,checkInternetConnection,args=(vehicle,))
-checkConnectTimer.start()
-print("Check Connect Timer Set")
+#checkConnectTimer = RepeatTimer(10,checkInternetConnection,args=(drone,))
+#checkConnectTimer.start()
+#print("Check Connect Timer Set")
 
+drone.takeoff(10)
+time.sleep(10)
+drone.land()
 
-vehicle.takeoff(3)
-time.sleep(3)
-vehicle.land()
+try:
+    while True:
+        time.sleep(1)
+        #print("main loop")
+except KeyboardInterrupt:
+    drone.cancelStateReport()
+    #checkConnectTimer.cancel()
+    #time.sleep(1)
+    drone.vehicle.close()
+    
+

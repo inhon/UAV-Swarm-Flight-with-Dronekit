@@ -8,8 +8,12 @@ import time
 import sys
 import math
 import socket
+import os
 
-sys.path.append("..")
+#sys.path.append("..")
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
+
 from Drone import Drone
 from RepeatTimer import RepeatTimer, sendMsg
 from Internet import checkInternetConnection
@@ -19,17 +23,19 @@ if(len(sys.argv) <4):
     print("Should have 3 arguments: argv[] = [<'base' or 'rover'>, <base's IP>, <port number>]")
     sys.exit()
 
-connection_strings = ["/dev/ttyACM0","/dev/tty.usbmodem14101"]
-# connection_string = "/dev/tty.usbmodem14101"
+connection_strings = ["tcp:127.0.0.1:5762"]
+#connection_strings = ["tcp:127.0.0.1:5762","tcp:127.0.0.1:5772"]
+#connection_string = "tcp:127.0.0.1:5762"
+#connection_string = "/dev/tty.usbmodem14101"
 
 ''' Connect to vehicle '''
 for connection_string in connection_strings:
-    vehicle = Drone(connection_string)
-    if(vehicle.connected): break
-vehicle.setStateReport(3)
+    drone = Drone(connection_string)
+    if(drone.connected): break
+drone.setStateReport(3)
 
 ''' Setting up a checker to see if internet connection works, otherwise land the vehicle'''
-checkConnectTimer = RepeatTimer(10,checkInternetConnection,args=(vehicle,))
+checkConnectTimer = RepeatTimer(10,checkInternetConnection,args=(drone,))
 checkConnectTimer.start()
 print("Check Connect Timer Set")
 
@@ -45,7 +51,7 @@ if(sys.argv[1] == "base"):
     client, address = server.accept()
     print("Base Connection established")
     
-    sendMsgTimer = RepeatTimer(1,sendMsg, args=(vehicle, client,))
+    sendMsgTimer = RepeatTimer(1,sendMsg, args=(drone, client,))
     sendMsgTimer.start()
     while(1):
         print("Base in while loop")
@@ -56,7 +62,6 @@ elif(sys.argv[1] == "rover"):
 
     ''' Setting up client '''
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #ip = "172.20.10.8"
     ip = sys.argv[2]
     port = int(sys.argv[3])
     client.connect((ip,port))
@@ -65,7 +70,7 @@ elif(sys.argv[1] == "rover"):
     counter=0
     while(counter<5):
         print("Enter Iteration",counter)
-        targetPoint = vehicle.receiveInfo(client)
+        targetPoint = drone.receiveInfo(client)
         
         if(type(targetPoint) == LocationGlobalRelative):
             targetPoint.alt = 3
