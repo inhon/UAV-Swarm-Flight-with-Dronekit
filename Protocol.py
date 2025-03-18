@@ -28,6 +28,9 @@ class Protocol():
             lat = float(vehicle.location.global_frame.lat)
             lon = float(vehicle.location.global_frame.lon)
             alt = float(vehicle.location.global_relative_frame.alt)
+            ####
+            if (alt<0): alt=0.0
+            ###
             current_time = datetime.now().strftime("%M%S")          # This will turn the time into minute and second format, something like 0835 (08:35)
             # assert(lat <= 90 and lat >= -90)              
             # assert(lon <= 180 and lon >= -180)      
