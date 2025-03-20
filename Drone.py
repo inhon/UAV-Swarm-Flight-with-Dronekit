@@ -251,7 +251,8 @@ class Drone(dronekit.Vehicle):
             
             currentTime = int(datetime.now().strftime("%S"))
             ''' If the received data was delayed for less than ___ seconds'''
-            if(timeIsValid(curTime=currentTime,recvTime=recvTime)):
+            #if(timeIsValid(curTime=currentTime,recvTime=recvTime)):
+            if(True):
                 print("Distance to the received point:",get_distance_metres(p1,self.vehicle.location.global_frame))
                 return p1
             else:

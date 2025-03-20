@@ -11,37 +11,29 @@ import time
 import sys
 import math
 import socket
+import os
 
-sys.path.append("..")
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
+
 from Drone import Drone
 from RepeatTimer import RepeatTimer, sendMsg
 from Internet import checkInternetConnection
 
-SEND_INTERVAL = 1
+SEND_INTERVAL = 1 
 SLEEP_LENGTH = 0.5
 
 if(len(sys.argv) <4): 
     print("Should have 3 arguments: argv[] = [<'base' or 'rover'>, <base's IP>, <port number>]")
     sys.exit()
 
-connection_strings = ["/dev/ttyACM0","/dev/tty.usbmodem14101"]
-# connection_string = "/dev/tty.usbmodem14101"
-
-''' Connect to vehicle '''
-for connection_string in connection_strings:
-    vehicle = Drone(connection_string)
-    if(vehicle.connected): break
-vehicle.setStateReport(3)
-
-''' Setting up a checker to see if internet connection works, otherwise land the vehicle'''
-checkConnectTimer = RepeatTimer(10,checkInternetConnection,args=(vehicle,))
-checkConnectTimer.start()
-print("Check Connect Timer Set")
+baseDroneIP="tcp:127.0.0.1:5762"
+roverDroneIP="tcp:127.0.0.1:5772"
 
 if(sys.argv[1] == "base"):
+    baseDrone = Drone(baseDroneIP)
     print("=====BASE=====")
     ''' Setting up server '''
-    #ip = "172.20.10.8"
     ip = sys.argv[2]
     port = int(sys.argv[3])
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,23 +42,24 @@ if(sys.argv[1] == "base"):
     client, address = server.accept()
     print("Base Connection established")
     
-    sendMsgTimer = RepeatTimer(SEND_INTERVAL,sendMsg, args=(vehicle, client,))
+    sendMsgTimer = RepeatTimer(SEND_INTERVAL,sendMsg, args=(baseDrone, client,))
     sendMsgTimer.start()
+    baseDrone.takeoff(20)
     while(1):
         print("Base in while loop")
         time.sleep(1)
 
 elif(sys.argv[1] == "rover"):
+    roverDrone = Drone(roverDroneIP)
     print("=====ROVER=====")
 
     ''' Setting up client '''
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #ip = "172.20.10.8"
     ip = sys.argv[2]
     port = int(sys.argv[3])
     client.connect((ip,port))
     print("Rover Connection Established")
-    vehicle.takeoff(3)
+    roverDrone.takeoff(15)
     
     counter=0
     numInvalidMsg = 0
@@ -76,14 +69,15 @@ elif(sys.argv[1] == "rover"):
     numInvalidMsg is a safety measure that makes sure if the rover forever receives outdated (invalid) message, 
     we will break from the loop and land.
     '''
-    while(numInvalidMsg < 5 and counter<5):
+    #while(numInvalidMsg < 5 and counter<5):
+    while (True):
         print("Enter Iteration",counter)
-        targetPoint = vehicle.receiveInfo(client)
+        targetPoint = roverDrone.receiveInfo(client)
         
         if(type(targetPoint) == LocationGlobalRelative):
-            targetPoint.alt = 3
+            targetPoint.alt = 15
             print("Received target:",targetPoint)
-            vehicle.flyToPoint(targetPoint, 2)
+            roverDrone.flyToPoint(targetPoint, 2)
             counter = counter+1
             numInvalidMsg = 0
         else:
@@ -91,7 +85,7 @@ elif(sys.argv[1] == "rover"):
         
         time.sleep(SLEEP_LENGTH)
     
-    vehicle.land()
+    #roverDrone.land()
 
 
 else:
