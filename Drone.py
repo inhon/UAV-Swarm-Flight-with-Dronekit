@@ -80,8 +80,8 @@ class Drone(dronekit.Vehicle):
         #   immediately).
 
         while True:
-            print("Altitude: ", self.vehicle.location.global_relative_frame.alt)
-            print("Ascending to altitude: "+str(aTargetAltitude))
+            #print("Altitude: ", self.vehicle.location.global_relative_frame.alt)
+            #print("Ascending to altitude: "+str(aTargetAltitude))
 
             # Break and return from function just below target altitude.
             if self.vehicle.location.global_relative_frame.alt >= aTargetAltitude * 0.95:
@@ -251,8 +251,7 @@ class Drone(dronekit.Vehicle):
             
             currentTime = int(datetime.now().strftime("%S"))
             ''' If the received data was delayed for less than ___ seconds'''
-            #if(timeIsValid(curTime=currentTime,recvTime=recvTime)):
-            if(True):
+            if(timeIsValid(curTime=currentTime,recvTime=recvTime)):
                 print("Distance to the received point:",get_distance_metres(p1,self.vehicle.location.global_frame))
                 return p1
             else:
@@ -261,12 +260,15 @@ class Drone(dronekit.Vehicle):
                 return None     
 
 def timeIsValid(recvTime, curTime):
+    '''
     if(curTime >= recvTime):
         if(curTime-recvTime < ACCEPTED_DELAY): return True
         else: return False
     else:
         if(curTime+60 -recvTime < ACCEPTED_DELAY): return True
         else: return False
+    '''
+    return True
 
 def get_distance_metres(aLocation1, aLocation2):
     """

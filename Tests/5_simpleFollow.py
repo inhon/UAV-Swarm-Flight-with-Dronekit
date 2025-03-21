@@ -69,8 +69,8 @@ elif(sys.argv[1] == "rover"):
     numInvalidMsg is a safety measure that makes sure if the rover forever receives outdated (invalid) message, 
     we will break from the loop and land.
     '''
-    #while(numInvalidMsg < 5 and counter<5):
-    while (True):
+    while(numInvalidMsg < 5 and counter<5):
+    #while (True):
         print("Enter Iteration",counter)
         targetPoint = roverDrone.receiveInfo(client)
         
@@ -85,7 +85,7 @@ elif(sys.argv[1] == "rover"):
         
         time.sleep(SLEEP_LENGTH)
     
-    #roverDrone.land()
+    roverDrone.land()
 
 
 else:
