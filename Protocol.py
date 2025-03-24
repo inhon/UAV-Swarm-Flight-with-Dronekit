@@ -56,7 +56,7 @@ class Protocol():
         msgName = client.recv(1).decode()
         # print("Received Msg Name", msgName)
         if(msgName == "0"):
-            msg = client.recv(34).decode()
+            msg = client.recv(33).decode()
             # print("Received:",msg)
             lat = float(msg[0:11])
             lon = float(msg[11:23])
