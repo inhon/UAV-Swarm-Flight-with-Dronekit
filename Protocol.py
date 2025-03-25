@@ -28,13 +28,11 @@ class Protocol():
             lat = float(vehicle.location.global_frame.lat)
             lon = float(vehicle.location.global_frame.lon)
             alt = float(vehicle.location.global_relative_frame.alt)
-            ####
             if (alt<0): alt=0.0
-            ###
-            current_time = datetime.now().strftime("%M%S")          # This will turn the time into minute and second format, something like 0835 (08:35)
+            current_time = datetime.now().strftime("%M%S")     # This will turn the time into minute and second format, something like 0835 (08:35)
             # assert(lat <= 90 and lat >= -90)              
             # assert(lon <= 180 and lon >= -180)      
-            # assert(alt < 100)                    # Assumes altitude below 100, if higher the message format requires adaptation
+            # assert(alt < 100)    # Assumes altitude below 100, if higher the message format requires adaptation
             TCP_msg = "0"+ str("{:011.8f}".format(lat)) + str("{:012.8f}".format(lon)) + str("{:06.2f}".format(alt)) + str(current_time)
             
         elif msgName == "TAKEOFF":
@@ -50,7 +48,7 @@ class Protocol():
             return
         
         client.send(TCP_msg.encode())
-        print("Sent",msgName)
+        #print("Sent",msgName)
 
     def recvMsg(self, client):
         msgName = client.recv(1).decode()
@@ -64,7 +62,7 @@ class Protocol():
             recvTime = int(msg[31:33])
             # assert(lat <= 90 and lat >= -90)               
             # assert(lon <= 180 and lon >= -180)             
-            # assert(alt < 100)                   # Assumes altitude below 100, if higher the message format requires adaptation
+            # assert(alt < 100)                  
 
             return lat, lon, alt, recvTime
         elif(msgName == "1"):

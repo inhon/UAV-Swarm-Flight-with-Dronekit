@@ -12,7 +12,7 @@ from Protocol import Protocol
 ACCEPTED_DELAY = 3 
 
 class Drone(dronekit.Vehicle):
-    # (24.78910480,120.99512870) 交大操場入口再往前一點
+    # (22.9049399147239,120.272397994995,27.48,0) 長榮大學 圖書館前 機頭朝北
     def __init__(self, connection_string):  
         print("Connecting to vehicle on: %s" % connection_string)
         self.connected = True
@@ -21,14 +21,13 @@ class Drone(dronekit.Vehicle):
         except Exception as e:
             print(e)
             self.connected = False
-
         
-        self.stateCheck=None
+        self.stateCheck=None 
+        #檢查無人機模式是否為land，只有在執行land後才設定為"land"
         self.stateReportTimer=None
         self.protocol = Protocol()
     
     def preArmCheck(self):
-        self.vehicle.manualArm = True
         print("Basic pre-arm checks")
         # Don't try to arm until autopilot is ready
         while not self.vehicle.is_armable:
@@ -61,28 +60,24 @@ class Drone(dronekit.Vehicle):
 
     def takeoff(self, aTargetAltitude):
         """
-        Arms vehicle and fly to aTargetAltitude.
+        In Guided mode, arms vehicle and fly to aTargetAltitude.
         """
 
         # Waiting for manual confirmation for takeoff
         while(input("\033[93m {}\033[00m" .format("Allow takeoff? y/n\n")) != "y"):
             pass
+            
+        self.preArmCheck() #切換為Guided 模式
 
-        self.preArmCheck()
-
-        print("Taking off!")
-        print("Ascending to altitude: "+str(aTargetAltitude))
+        #print("Taking off!")
+        #print("Ascending to altitude: "+str(aTargetAltitude))
         self.vehicle.simple_takeoff(aTargetAltitude)  # Take off to target altitude
         
         
         # Wait until the vehicle reaches a safe height before processing the goto
-        #  (otherwise the command after Vehicle.simple_takeoff will execute
-        #   immediately).
-
         while True:
             #print("Altitude: ", self.vehicle.location.global_relative_frame.alt)
             #print("Ascending to altitude: "+str(aTargetAltitude))
-
             # Break and return from function just below target altitude.
             if self.vehicle.location.global_relative_frame.alt >= aTargetAltitude * 0.95:
                 print("Reached target altitude")
@@ -96,18 +91,16 @@ class Drone(dronekit.Vehicle):
         # fly to takoff location
         print("Exiting takeoff()")
 
-    def flyToPoint(self,targetPoint, speed):
+    def flyToPoint(self,targetPoint, speed): 
         # point1 = LocationGlobalRelative(float(lat), float(lon), float(alt))
-        self.vehicle.airspeed = speed
-
-        print("Target Point: ({:12.8f},{:12.8f},{:5.2f})".format(targetPoint.lat,targetPoint.lon,targetPoint.alt))
-
+        self.vehicle.airspeed = speed #(m/sec)
+        #print("Target Point: ({:12.8f},{:12.8f},{:5.2f})".format(targetPoint.lat,targetPoint.lon,targetPoint.alt))
         targetDistance = get_distance_metres(self.vehicle.location.global_relative_frame, targetPoint)
         print("Target distance: ",str(targetDistance))
 
         self.vehicle.simple_goto(targetPoint)
         print("Executed simple_goto()")
-
+        #等待無人機飛到指定點
         while self.vehicle.mode.name=="GUIDED": #Stop action if we are no longer in guided mode.
             remainingDistance=get_distance_metres(self.vehicle.location.global_relative_frame, targetPoint)
             print("Distance to target: ", remainingDistance)
@@ -127,10 +120,10 @@ class Drone(dronekit.Vehicle):
         # point1 = LocationGlobalRelative(float(lat), float(lon), float(alt))
         self.vehicle.airspeed = speed
 
-        print("Target Point: ({:12.8f},{:12.8f},{:5.2f})".format(targetPoint.lat,targetPoint.lon,targetPoint.alt))
+        #print("Target Point: ({:12.8f},{:12.8f},{:5.2f})".format(targetPoint.lat,targetPoint.lon,targetPoint.alt))
 
         targetDistance = get_distance_metres(self.vehicle.location.global_relative_frame, targetPoint)
-        print("Target distance: ",str(targetDistance))
+        #print("Target distance: ",str(targetDistance))
 
         self.vehicle.simple_goto(targetPoint)
         # print("Executed simple_goto()")
@@ -141,7 +134,7 @@ class Drone(dronekit.Vehicle):
             pass
 
         self.stateCheck = "land"
-        print("Trying to set vehicle mode to LAND...")
+        #print("Trying to set vehicle mode to LAND...")
         while(self.vehicle.mode != VehicleMode("LAND")):
             self.vehicle.mode = VehicleMode("LAND")
         print("Landing")
@@ -213,7 +206,7 @@ class Drone(dronekit.Vehicle):
         client.send(TCP_msg.encode())
         print("Sent:",TCP_msg)
         '''
-        self.protocol.sendMsg(client, msgName, self.vehicle)
+        self.protocol.sendMsg(client, msgName, self.vehicle) # vehicle 用來取得無人機位置
     # Rover Drone will need to receive Base's coordinates and keep following it (keep flyToPoint(Base's coordinates))
     def receiveInfo(self, client):
         '''
@@ -257,23 +250,25 @@ class Drone(dronekit.Vehicle):
             else:
                 print("Rover received an outdated message")
                 print(currentTime,recvTime)
-                return None     
+                return None  
+    def closeConn(self):
+        print("Close connection to vehicle")
+        self.vehicle.close()
+
 
 def timeIsValid(recvTime, curTime):
-    '''
     if(curTime >= recvTime):
         if(curTime-recvTime < ACCEPTED_DELAY): return True
         else: return False
     else:
         if(curTime+60 -recvTime < ACCEPTED_DELAY): return True
         else: return False
-    '''
+    
     return True
 
 def get_distance_metres(aLocation1, aLocation2):
     """
     Returns the ground distance in metres between two LocationGlobal objects.
-
     This method is an approximation, and will not be accurate over large distances and close to the 
     earth's poles.
     """

@@ -1,6 +1,5 @@
 ''' 
 This test is designed for a simple check to see if follower drone actually follows the leader drone. 
-We tested it by holding the leader drone in our hand and let the follower drone takeoff and follow the leader.
 '''
 
 '''
@@ -41,13 +40,22 @@ if(sys.argv[1] == "base"):
     server.listen(5)
     client, address = server.accept()
     print("Base Connection established")
-    baseDrone.takeoff(25)
+    baseDrone.takeoff(25) #Waiting for manual confirmation for takeoff. blocking
     sendMsgTimer = RepeatTimer(SEND_INTERVAL,sendMsg, args=(baseDrone, client,))
+    '''
+    def sendMsg(drone, client):
+    drone.sendInfo(client, "COORDINATES")
+    '''
     sendMsgTimer.start()
     #baseDrone.takeoff(25)
-    while(1):
-        print("Base in while loop")
+    try:
+       while(1):
+        #print("Base in while loop")
         time.sleep(1)
+    except KeyboardInterrupt:
+        baseDrone.vehicle.mode=VehicleMode("RTL")
+        #roverDrone.land()
+        baseDrone.close()
 
 elif(sys.argv[1] == "rover"):
     roverDrone = Drone(roverDroneIP)
@@ -59,7 +67,7 @@ elif(sys.argv[1] == "rover"):
     port = int(sys.argv[3])
     client.connect((ip,port))
     print("Rover Connection Established")
-    roverDrone.takeoff(15)
+    roverDrone.takeoff(15) #Waiting for manual confirmation for takeoff. blocking
     
     counter=0
     numInvalidMsg = 0
@@ -78,15 +86,16 @@ elif(sys.argv[1] == "rover"):
             if(type(targetPoint) == LocationGlobalRelative):
                 targetPoint.alt = 15
                 print("Received target:",targetPoint)
-                roverDrone.flyToPoint(targetPoint, 3)
+                roverDrone.flyToPoint(targetPoint, 3) #blocking
                 counter = counter+1
                 numInvalidMsg = 0
             else:
                 numInvalidMsg = numInvalidMsg + 1
             time.sleep(SLEEP_LENGTH)
     except KeyboardInterrupt:
-        roverDrone.land()
-        roverDrone.vehicle.close()
+        roverDrone.vehicle.mode=VehicleMode("RTL")
+        #roverDrone.land()
+        roverDrone.close()
     # Terminate program and socket 
 else:
     print("Please specify which drone it is")
