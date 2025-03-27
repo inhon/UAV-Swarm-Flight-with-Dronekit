@@ -21,8 +21,8 @@ from Internet import checkInternetConnection
 
 SEND_INTERVAL = 1 
 SLEEP_LENGTH = 0.5
-baseDroneIP="tcp:127.0.0.1:5762"
-roverDroneIP="tcp:127.0.0.1:5772"
+baseVehicleIP="tcp:127.0.0.1:5762"
+roverVehicleIP="tcp:127.0.0.1:5772"
 
 if(len(sys.argv) <4): 
     print("Should have 3 arguments: argv[] = [<'base' or 'rover'>, <base's IP>, <port number>]")
@@ -30,7 +30,7 @@ if(len(sys.argv) <4):
     sys.exit()
 
 if(sys.argv[1] == "base"):
-    baseDrone = Drone(baseDroneIP)
+    baseDrone = Drone(baseVehicleIP)
     print("=====BASE=====")
     ''' Setting up server '''
     ip = sys.argv[2]
@@ -58,7 +58,7 @@ if(sys.argv[1] == "base"):
         baseDrone.close()
 
 elif(sys.argv[1] == "rover"):
-    roverDrone = Drone(roverDroneIP)
+    roverDrone = Drone(roverVehicleIP)
     print("=====ROVER=====")
 
     ''' Setting up client '''
